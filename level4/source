@@ -1,0 +1,21 @@
+int global;
+
+void main(void)
+{
+	n();
+}
+
+void n(void)
+{
+	char buffer[520];
+
+	fgets(buffer, 512, stdin);
+	p(buffer);
+	if (global == 16930116)
+		system("/bin/cat /home/user/level5/.pass");
+}
+
+void p(char *format)
+{
+	printf(format);
+}

