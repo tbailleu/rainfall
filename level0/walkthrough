@@ -1,0 +1,11 @@
+There is a setuid binary "level0" own by level1
+
+After disassembling the binary we can see that main() function call execv() with "/bin/sh"
+only if it assert atoi(argv[1]) == 423
+
+so we just need to pass "423" to first argument
+
+level0@RainFall:~$> ./level0 423
+
+level1@RainFall:~$> cat ~level1/.pass
+1fe8a524fa4bec01ca4ea2a869af2a02260d4a7d5fe7e7c24d8617e6dca12d3a
