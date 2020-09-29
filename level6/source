@@ -1,0 +1,23 @@
+typedef void code(void);
+
+void main(int argc,char **argv)
+{
+	char *buffer;
+	code **func;
+
+	buffer = malloc(64);
+	func = malloc(sizeof(*func));
+	*func = m;
+	strcpy(buffer,argv[1]);
+	(**func)();
+}
+
+void m(void)
+{
+	puts("Nope");
+}
+
+void n(void)
+{
+	system("/bin/cat /home/user/level7/.pass");
+}
