@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+char global[80];
+
+int main(int argc,char **argv)
+{
+	char **tab1;
+	char *str1;
+	char **tab2;
+	char *str2;
+	FILE *stream;
+
+	tab1 = (char **)malloc(2 * sizeof(char *));
+	str1 = (char *)malloc(8);
+	tab1[0] = (char *)1;
+	tab1[1] = str1;
+
+	tab2 = (char **)malloc(2 * sizeof(char *));
+	str2 = (char *)malloc(8);
+	tab2[0] = (char *)2;
+	tab2[1] = str2;
+
+	strcpy(tab1[1], argv[1]);
+	strcpy(tab2[1], argv[2]);
+
+	stream = fopen("/home/user/level8/.pass", "r");
+	fgets(global, 68, stream);
+
+	puts("~~");
+
+	return (0);
+}
+
+void m(void)
+{
+	printf("%s - %d\n", global, time(0));
+}

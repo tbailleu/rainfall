@@ -1,0 +1,44 @@
+There is a setuid binary "level7" own by level8
+
+After disassembling the binary we can see that main() function call strcpy() twice
+and it's the same as previous level
+
+Here again the vulnerability resides in the strcpy() call
+as destination buffer isn't protected from overflow
+This is called a Heap Overflow Attack
+
+The main() function read the file "/home/user/level8/.pass"
+and store it's content in a global buffer
+
+There is a m() function located at [0x80484f4] which prints the global buffer
+
+As seen in level5 we can overwrite the Global Offset Table
+here we want puts() to point to function m()
+
+puts() located at [0x8048400] jump to what it's stored in [0x8049928] inside the GOT
+
+So if we overwrite the GOT address to redirect the real glibc puts() to function m()
+then we'll get the pass
+
+Here a look at memory map, there is 4 malloc and there is a 8 Bytes spacing between each malloc
+|-------------------|-----|-------------------|-----|-------------------|-----|-------------------|
+|      8 Bytes      |     |      8 Bytes      |     |      8 Bytes      |     |      8 Bytes      |
+| char       **tab1 |  8  | char        *str1 |  8  | char       **tab2 |  8  | char        *str2 |
+|                   |  B  |                   |  B  |                   |  B  |                   |
+|-------------------|  y  |-------------------|  y  |-------------------|  y  |-------------------|
+| 4 Bytes | 4 Bytes |  t  |                   |  t  | 4 Bytes | 4 Bytes |  t  |                   |
+| tab1[0] | tab1[1] |  e  |                   |  e  | tab2[0] | tab2[1] |  e  |                   |
+|         |         |  s  |                   |  s  |         |         |  s  |                   |
+|    1    |  &str1  |     |   8Bytes buffer   |     |    2    |  &str2  |     |   8Bytes buffer   |
+|-------------------|-----|-------------------|-----|-------------------|-----|-------------------|
+
+The first strcpy() copy first argument in tab1[1] named here str1
+and the second strcpy() copy the second argument in tab2[1]
+if by overflowing str1 we can overwrite tab2 we can use that to replace the GOT address of puts
+
+We send data to overflow the buffer then send the puts() GOT address we want to change to argv[1]
+and the m() address to argv[2]
+
+level6@RainFall:~$> ./level7 `python -c 'print "a" * 20 + "\x28\x99\x04\x08"'` `python -c 'print "\xf4\x84\x04\x08"'`
+5684af5cb4c8679958be4abe6373147ab52d95768e047820bf382e44fa8d8fb9
+ - 1601547067
