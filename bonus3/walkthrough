@@ -1,0 +1,19 @@
+There is a setuid binary "bonus3" own by end
+
+After disassembling the binary we can see that main() function call execl() on "/bin/sh"
+only if it assert `strcmp(passwd, argv[1]) == 0`
+
+so we need to make passwd and argv[1] the same to get a shell
+
+passwd buffer is feed from "/home/user/end/.pass" file
+and then truncated to `atoi(argv[1])` number of characters
+
+Here we use the fact that atoi return 0 when called with a empty string
+
+passwd will get truncated to a 0 length string
+which will obviously match with the empty string of argv[1]
+
+bonus3@RainFall:~$> ./bonus3 ""
+
+end@RainFall:~$> cat ~end/.pass
+3321b6f81659f9a71c76616f606e4b50189cecfea611393d5d649f75e157353c

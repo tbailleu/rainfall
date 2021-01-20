@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+int	main(int argc,char **argv)
+{
+	char	passwd[64];
+	char	buf2[66];
+	FILE	*fd;
+
+	fd = fopen("/home/user/end/.pass","r");
+	memset(passwd, 0, 132);
+	if ((fd == NULL) || (argc != 2))
+		return (-1);
+	fread(passwd, 1, 66, fd);
+	passwd[atoi(argv[1])] = '\0';
+	fread(buf2, 1, 65, fd);
+	fclose(fd);
+	if (strcmp(passwd, argv[1]) == 0)
+		execl("/bin/sh","sh",0);
+	else
+		puts(buf2);
+	return (0);
+}
