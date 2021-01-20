@@ -8,9 +8,7 @@ char *service;
 
 int main(void)
 {
-	char read_buf[5];
-	char buf_2[2];
-	char buf_125[125];
+	char read_buf[5 + 2 + 125];
 
 	while (1)
 	{
@@ -21,14 +19,14 @@ int main(void)
 		{
 			auth = malloc(1 * sizeof(int));
 			*auth = 0;
-			if (strlen(buf_2) < 31)
-				strcpy((char *)auth, buf_2);
+			if (strlen(read_buf + 5) < 31)
+				strcpy((char *)auth, read_buf + 5);
 		}
 		if (strncmp(read_buf, "reset", 5))
 			if (auth)
 				free(auth);
 		if (strncmp(read_buf, "service", 6))
-			service = strdup(buf_125);
+			service = strdup(read_buf + 7);
 		if (strncmp(read_buf, "login", 5)) {
 			if (auth[8] == 0)
 				fwrite("Password:\n", 1, 10, stdout);
