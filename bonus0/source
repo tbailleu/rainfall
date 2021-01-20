@@ -1,0 +1,36 @@
+void readline_first20(char *out,char *str)
+{
+	char *ptr;
+	char buffer [4096 + 8];
+
+	puts(str);
+	read(0, buffer, 4096);
+	ptr = strchr(buffer, '\n');
+	*ptr = 0;
+	strncpy(out, buffer, 20);
+}
+
+void pp(char *result)
+{
+	int		len;
+	char	str1[20];
+	char	str2[20];
+
+	readline_first20(str1, " - ");
+	readline_first20(str2, " - ");
+	strcpy(result,str1);
+	len = strlen(result);
+	result[len] = ' ';
+	result[len + 1] = '\0';
+	strcat(result, str2);
+	return;
+}
+
+int main(void)
+{
+	char buffer[54];
+
+	pp(buffer);
+	puts(buffer);
+	return (0);
+}
