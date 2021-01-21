@@ -18,7 +18,7 @@ void pp(char *result)
 
 	readline_first20(str1, " - ");
 	readline_first20(str2, " - ");
-	strcpy(result,str1);
+	strcpy(result, str1);
 	len = strlen(result);
 	result[len] = ' ';
 	result[len + 1] = '\0';

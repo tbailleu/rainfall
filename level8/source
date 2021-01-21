@@ -15,19 +15,20 @@ int main(void)
 		printf("%p, %p \n", auth, service);
 		if (fgets((char *)read_buf, 128, stdin) == 0)
 			return (0);
-		if (strncmp(read_buf, "auth ", 5))
+		if (strncmp(read_buf, "auth ", 5) == 0)
 		{
 			auth = malloc(1 * sizeof(int));
 			*auth = 0;
 			if (strlen(read_buf + 5) < 31)
 				strcpy((char *)auth, read_buf + 5);
 		}
-		if (strncmp(read_buf, "reset", 5))
+		if (strncmp(read_buf, "reset", 5) == 0)
 			if (auth)
 				free(auth);
-		if (strncmp(read_buf, "service", 6))
+		if (strncmp(read_buf, "service", 6) == 0)
 			service = strdup(read_buf + 7);
-		if (strncmp(read_buf, "login", 5)) {
+		if (strncmp(read_buf, "login", 5) == 0)
+		{
 			if (auth[8] == 0)
 				fwrite("Password:\n", 1, 10, stdout);
 			else

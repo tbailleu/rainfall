@@ -1,6 +1,6 @@
 typedef void code(void);
 
-void main(int argc,char **argv)
+void main(int argc, char **argv)
 {
 	char *buffer;
 	code **func;
@@ -8,7 +8,7 @@ void main(int argc,char **argv)
 	buffer = malloc(64);
 	func = malloc(sizeof(*func));
 	*func = m;
-	strcpy(buffer,argv[1]);
+	strcpy(buffer, argv[1]);
 	(**func)();
 }
 
